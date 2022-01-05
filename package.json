@@ -1,0 +1,33 @@
+{
+  "name": "crawlinator",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "main": "./dist/cli.js",
+  "bin": {
+    "crawlinator": "./dist/cli.js"
+  },
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node --transpile-only ./src/cli.ts",
+    "lint": "eslint --fix --ignore-path .gitignore ./src",
+    "start": "node ./dist/cli.js"
+  },
+  "dependencies": {
+    "yargs": "^17.3.1"
+  },
+  "devDependencies": {
+    "@lewebsimple/eslint-config": "^0.5.0",
+    "@types/node": "^17.0.8",
+    "@types/yargs": "^17.0.8",
+    "eslint": "^8.6.0",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  },
+  "eslintConfig": {
+    "extends": "@lewebsimple/eslint-config"
+  }
+}
