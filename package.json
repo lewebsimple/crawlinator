@@ -17,10 +17,13 @@
     "start": "node ./dist/cli.js"
   },
   "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "ohmyfetch": "^0.4.14",
     "yargs": "^17.3.1"
   },
   "devDependencies": {
     "@lewebsimple/eslint-config": "^0.5.0",
+    "@types/cheerio": "^0.22.30",
     "@types/node": "^17.0.8",
     "@types/yargs": "^17.0.8",
     "eslint": "^8.6.0",
