@@ -17,6 +17,7 @@ export async function fetchUrl(url: string): Promise<string> {
       const status = response.response.status;
       console.log(`${status} - ${url}`);
     },
+    responseType: "text",
   }).catch(() => {
     return "";
   });
@@ -54,13 +55,13 @@ function getUrlsFromContent(content: string): string[] {
   // href
   $("a").each((i, link) => {
     const href = $(link).attr("href");
-    if (href && href.startsWith("http")) {
+    if (href) {
       urls.push(href);
     }
   });
 
   // src
-  $("img").each((i, img) => {
+  $("img,script,style").each((i, img) => {
     const src = $(img).attr("src");
     if (src) {
       urls.push(src);
