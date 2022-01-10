@@ -1,5 +1,5 @@
 import { $fetch } from "ohmyfetch";
-import cheerio from "cheerio";
+import cheerio, { CheerioAPI } from "cheerio";
 import type { Arguments, CommandBuilder } from "yargs";
 
 type Options = {
@@ -18,13 +18,20 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
   console.log(`Crawling XML sitemap ${url}...`);
   const response = await $fetch(url);
 
-  const $ = cheerio.load(response, { xmlMode: true });
-  const pages: string[] = [];
-  $("loc").each((i, loc) => {
-    pages.push($(loc).text());
-  });
+  const urls = getUrlsFromSitemap(response);
 
   // TODO Crawl links inside pages (href, src, )
 
   process.exit(0);
 };
+
+function getUrlsFromSitemap(sitemap: string): string[] {
+  const urls: string[] = [];
+
+  const $sitemap = cheerio.load(sitemap, { xmlMode: true });
+  $sitemap("loc").each((i, loc) => {
+    urls.push($sitemap(loc).text());
+  });
+
+  return urls;
+}
