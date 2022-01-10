@@ -1,5 +1,5 @@
 import { $fetch } from "ohmyfetch";
-import cheerio, { CheerioAPI } from "cheerio";
+import cheerio from "cheerio";
 import type { Arguments, CommandBuilder } from "yargs";
 
 type Options = {
@@ -15,12 +15,10 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
   const { url } = argv;
 
-  console.log(`Crawling XML sitemap ${url}...`);
-  const response = await $fetch(url);
-
-  const urls = getUrlsFromSitemap(response);
-
-  // TODO Crawl links inside pages (href, src, )
+  const urls = getUrlsFromSitemap(await $fetch(url));
+  for (const pageUrl of urls) {
+    urls.push(...getUrlsFromPage(await $fetch(pageUrl)));
+  }
 
   process.exit(0);
 };
@@ -31,6 +29,30 @@ function getUrlsFromSitemap(sitemap: string): string[] {
   const $sitemap = cheerio.load(sitemap, { xmlMode: true });
   $sitemap("loc").each((i, loc) => {
     urls.push($sitemap(loc).text());
+  });
+
+  return urls;
+}
+
+function getUrlsFromPage(page: string): string[] {
+  const urls: string[] = [];
+
+  const $page = cheerio.load(page);
+
+  // a href
+  $page("a").each((i, link) => {
+    const href = $page(link).attr("href");
+    if (href && href.startsWith("http")) {
+      urls.push(href);
+    }
+  });
+
+  // img src
+  $page("img").each((i, img) => {
+    const src = $page(img).attr("src");
+    if (src) {
+      urls.push(src);
+    }
   });
 
   return urls;
