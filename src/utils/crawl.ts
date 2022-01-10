@@ -26,19 +26,14 @@ export async function fetchUrl(url: string): Promise<string> {
 // Crawl web site
 export async function crawl(url: string): Promise<void> {
   try {
-    const { origin } = new URL(url);
-    const content = await fetchUrl(origin);
+    const content = await fetchUrl(url);
 
-    // Crawl sitemap.xml
-    const sitemapUrl = `${origin}/sitemap.xml`;
-    const sitemap = await fetchUrl(sitemapUrl);
-    const $ = cheerio.load(sitemap, { xmlMode: true });
-    const locs = $("loc").map((i, loc) => $(loc).text());
-    for (const loc of locs) {
-      const content = await fetchUrl(loc);
+    const { origin, pathname } = new URL(url);
+    const extension = pathname.includes(".") ? pathname.split(".").pop() || "" : "";
+    if (["", "xml"].includes(extension)) {
       const contentUrls = getUrlsFromContent(content);
       for (const contentUrl of contentUrls) {
-        await fetchUrl(contentUrl);
+        if (contentUrl.startsWith(origin)) await crawl(contentUrl);
       }
     }
   } catch (error) {
@@ -51,6 +46,11 @@ function getUrlsFromContent(content: string): string[] {
   const urls: string[] = [];
 
   const $ = cheerio.load(content);
+
+  // loc
+  $("loc").each((i, loc) => {
+    urls.push($(loc).text());
+  });
 
   // href
   $("a").each((i, link) => {
