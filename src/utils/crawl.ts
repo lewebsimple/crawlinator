@@ -1,10 +1,20 @@
 import { $fetch } from "ohmyfetch";
 import cheerio from "cheerio";
 
-export async function crawlUrl(url: string): Promise<string> {
+const urls: string[] = [];
+
+// Fetch a single URL and log the status message
+export async function fetchUrl(url: string): Promise<string> {
+  // Skip URL if already fetched
+  if (urls.includes(url)) {
+    return "";
+  }
+  urls.push(url);
+
+  // Perform fetch request
   return await $fetch(url, {
     onResponse: async (response) => {
-      const status = response.response.status.toString();
+      const status = response.response.status;
       console.log(`${status} - ${url}`);
     },
   }).catch(() => {
@@ -12,33 +22,46 @@ export async function crawlUrl(url: string): Promise<string> {
   });
 }
 
-function getUrlsFromSitemap(sitemap: string): string[] {
-  const urls: string[] = [];
+// Crawl web site
+export async function crawl(url: string): Promise<void> {
+  try {
+    const { origin } = new URL(url);
+    const content = await fetchUrl(origin);
 
-  const $sitemap = cheerio.load(sitemap, { xmlMode: true });
-  $sitemap("loc").each((i, loc) => {
-    urls.push($sitemap(loc).text());
-  });
-
-  return urls;
+    // Crawl sitemap.xml
+    const sitemapUrl = `${origin}/sitemap.xml`;
+    const sitemap = await fetchUrl(sitemapUrl);
+    const $ = cheerio.load(sitemap, { xmlMode: true });
+    const locs = $("loc").map((i, loc) => $(loc).text());
+    for (const loc of locs) {
+      const content = await fetchUrl(loc);
+      const contentUrls = getUrlsFromContent(content);
+      for (const contentUrl of contentUrls) {
+        await fetchUrl(contentUrl);
+      }
+    }
+  } catch (error) {
+    console.log(`Could not crawl ${url}`);
+  }
 }
 
-function getUrlsFromPage(page: string): string[] {
+// Parse HTML content for URLs to crawl
+function getUrlsFromContent(content: string): string[] {
   const urls: string[] = [];
 
-  const $page = cheerio.load(page);
+  const $ = cheerio.load(content);
 
-  // a href
-  $page("a").each((i, link) => {
-    const href = $page(link).attr("href");
+  // href
+  $("a").each((i, link) => {
+    const href = $(link).attr("href");
     if (href && href.startsWith("http")) {
       urls.push(href);
     }
   });
 
-  // img src
-  $page("img").each((i, img) => {
-    const src = $page(img).attr("src");
+  // src
+  $("img").each((i, img) => {
+    const src = $(img).attr("src");
     if (src) {
       urls.push(src);
     }

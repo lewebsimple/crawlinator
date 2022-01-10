@@ -1,12 +1,12 @@
 import type { Arguments, CommandBuilder } from "yargs";
-import { crawlUrl } from "../utils/crawl";
+import { crawl } from "../utils/crawl";
 
 type Options = {
   url: string;
 };
 
 export const command = "$0 <url>";
-export const desc = "Crawl XML sitemap at <url>";
+export const desc = "Crawl web site at <url>";
 
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs.positional("url", { type: "string", demandOption: true });
@@ -14,12 +14,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
   const { url } = argv;
 
-  try {
-    const website = new URL(url);
-    await crawlUrl(website.origin);
-  } catch (error) {
-    throw new Error("Invalid URL");
-  }
+  await crawl(url);
 
   process.exit(0);
 };
