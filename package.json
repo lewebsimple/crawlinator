@@ -2,7 +2,6 @@
   "name": "@lewebsimple/crawlinator",
   "version": "0.1.0",
   "license": "MIT",
-  "private": true,
   "main": "./dist/cli.js",
   "bin": {
     "crawlinator": "./dist/cli.js"
