@@ -1,5 +1,5 @@
 import type { Arguments, CommandBuilder } from "yargs";
-import { crawl } from "../utils/crawl";
+import { crawl } from "../utils/crawling";
 
 type Options = {
   url: string;
