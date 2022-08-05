@@ -5,6 +5,7 @@ import chalk from "chalk";
 interface UrlCache {
   status: number;
   links: string[];
+  headings: Record<string, string[]>;
   crawled: boolean;
 }
 const urlCache: Record<string, UrlCache> = {};
@@ -20,6 +21,19 @@ export async function crawl(url: string) {
   process.stdout.write(`\n${chalk.blue(url)}\n`);
   const { links } = await fetchUrl(url);
   urlCache[url].crawled = true;
+
+  // Headings
+  if (!url.endsWith(".xml")) {
+    if (urlCache[url].headings.h1.length === 1) {
+      process.stdout.write(`  ${chalk.green("H1")} - ${urlCache[url].headings.h1[0]}\n`);
+    } else if (urlCache[url].headings.h1.length > 1) {
+      urlCache[url].headings.h1.forEach((h1) => process.stdout.write(`  ${chalk.red("H1")} - ${h1}\n`));
+    } else {
+      process.stdout.write(`  ${chalk.red("H1")} - (empty)\n`);
+    }
+  }
+
+  // Links
   for (const link of links) {
     const { status } = await fetchUrl(link);
     switch (status) {
@@ -31,6 +45,7 @@ export async function crawl(url: string) {
         break;
     }
   }
+
   for (const link of links) {
     if (shouldCrawl(link)) {
       await crawl(link);
@@ -51,6 +66,7 @@ async function fetchUrl(url: string): Promise<UrlCache> {
     urlCache[url] = {
       status,
       links: getLinksFromContent(content),
+      headings: getHeadingsFromContent(content),
       crawled: false,
     };
   }
@@ -89,6 +105,17 @@ function getLinksFromContent(content: string): string[] {
       return "";
     })
     .filter((link) => link.length);
+}
+
+function getHeadingsFromContent(content: string): Record<string, string[]> {
+  const headings: Record<string, string[]> = {};
+  const $ = load(content);
+  ["h1", "h2"].forEach((tag) => {
+    headings[tag] = $(tag)
+      .map((_i, heading) => $(heading).text())
+      .toArray();
+  });
+  return headings;
 }
 
 // Helper: Should URL be crawled
