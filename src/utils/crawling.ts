@@ -12,8 +12,12 @@ const urlCache: Record<string, UrlCache> = {};
 
 let domain = "";
 
+interface CrawlOptions {
+  errorsOnly: boolean;
+}
+
 // Crawl URL
-export async function crawl(url: string) {
+export async function crawl(url: string, { errorsOnly }: CrawlOptions) {
   if (!domain) {
     const { origin } = new URL(url);
     domain = origin;
@@ -25,7 +29,7 @@ export async function crawl(url: string) {
   // Headings
   if (!url.endsWith(".xml")) {
     if (urlCache[url].headings.h1.length === 1) {
-      process.stdout.write(`  ${chalk.green("H1")} - ${urlCache[url].headings.h1[0]}\n`);
+      !errorsOnly && process.stdout.write(`  ${chalk.green("H1")} - ${urlCache[url].headings.h1[0]}\n`);
     } else if (urlCache[url].headings.h1.length > 1) {
       urlCache[url].headings.h1.forEach((h1) => process.stdout.write(`  ${chalk.red("H1")} - ${h1}\n`));
     } else {
@@ -38,7 +42,7 @@ export async function crawl(url: string) {
     const { status } = await fetchUrl(link);
     switch (status) {
       case 200:
-        process.stdout.write(`  ${chalk.green(status)} - ${link}\n`);
+        !errorsOnly && process.stdout.write(`  ${chalk.green(status)} - ${link}\n`);
         break;
       default:
         process.stdout.write(`  ${chalk.red(status)} - ${link}\n`);
@@ -48,7 +52,7 @@ export async function crawl(url: string) {
 
   for (const link of links) {
     if (shouldCrawl(link)) {
-      await crawl(link);
+      await crawl(link, { errorsOnly });
     }
   }
 }
