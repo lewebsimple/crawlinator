@@ -97,21 +97,25 @@ async function crawlPage(
       }
     });
 
-    // Crawl the page
-    logger.info(`Crawling page: ${url}`);
-    const response = await page.goto(url, { waitUntil: "domcontentloaded" });
-    await page.waitForSelector("body,sitemapindex");
-    if (!response) throw new Error(`Could not open page: ${url}`);
-
-    // Check page content type
-    const contentType = response.headers()["content-type"];
-    if (!(contentType.includes("text/html") || contentType.includes("text/xml"))) {
-      logger.warn(`Skipping non-HTML page: ${url}`);
-      return;
+    // Get the page content
+    logger.info(`Crawling: ${url}`);
+    let content: string;
+    if (url.includes(".xml")) {
+      const response = await fetch(url);
+      content = await response.text();
+    }
+    else {
+      const response = await page.goto(url, { waitUntil: "domcontentloaded" });
+      if (!response) throw new Error(`Could not open page: ${url}`);
+      const contentType = response.headers()["content-type"];
+      if (!contentType.includes("text/html")) {
+        logger.warn(`Skipping non-HTML page: ${url}`);
+        return;
+      }
+      content = await page.content();
     }
 
-    // Extract links from the page
-    const content = await page.content();
+    // Extract links from the page content
     await extractLinks(content, baseUrl, links);
 
     // Append the crawl result
