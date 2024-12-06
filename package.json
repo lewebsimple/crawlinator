@@ -1,42 +1,46 @@
 {
   "name": "@lewebsimple/crawlinator",
-  "version": "0.1.4",
+  "version": "0.2.0",
+  "description": "Crawlinator link checker",
+  "author": "Pascal Martineau <pascal@lewebsimple.ca>",
   "license": "MIT",
-  "main": "./dist/cli.js",
+  "main": "dist/index.js",
   "bin": {
-    "crawlinator": "./dist/cli.js"
+    "crawlinator": "dist/index.js"
   },
   "files": [
-    "/dist"
+    "dist/**/*"
   ],
   "scripts": {
-    "build": "tsc",
-    "dev": "ts-node --transpile-only ./src/cli.ts",
-    "lint": "eslint --fix --ignore-path .gitignore ./src",
-    "release": "release-it",
-    "start": "node ./dist/cli.js"
+    "build": "node build.mjs",
+    "dev": "tsx src/index.ts",
+    "lint": "eslint --fix .",
+    "prepare": "husky && playwright install"
   },
   "dependencies": {
-    "chalk": "^4",
-    "cheerio": "^1.0.0-rc.12",
-    "ohmyfetch": "^0.4.18",
-    "yargs": "^17.5.1"
+    "chalk": "^5.3.0",
+    "cheerio": "^1.0.0",
+    "commander": "^12.1.0",
+    "consola": "^3.2.3",
+    "husky": "^9.1.7",
+    "nano-staged": "^0.8.0",
+    "playwright": "^1.49.0",
+    "valibot": "1.0.0-beta.9"
   },
   "devDependencies": {
-    "@lewebsimple/eslint-config": "^0.5.5",
-    "@types/cheerio": "^0.22.31",
-    "@types/node": "^18.7.1",
-    "@types/yargs": "^17.0.11",
-    "eslint": "^8.21.0",
-    "release-it": "^15.3.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.7.4"
+    "@nuxt/eslint-config": "^0.7.2",
+    "@types/node": "^22.10.1",
+    "esbuild": "^0.24.0",
+    "eslint": "^9.16.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   },
-  "eslintConfig": {
-    "extends": "@lewebsimple/eslint-config"
+  "nano-staged": {
+    "**/*.{mjs,ts}": "eslint --fix"
   },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
-  }
+  },
+  "packageManager": "pnpm@9.14.2+sha512.6e2baf77d06b9362294152c851c4f278ede37ab1eba3a55fda317a4a17b209f4dbb973fb250a77abc463a341fcb1f17f17cfa24091c4eb319cda0d9b84278387"
 }

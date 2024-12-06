@@ -1,5 +1,0 @@
-{
-  "hooks": {
-    "after:bump": "yarn lint && yarn build"
-  }
-}
